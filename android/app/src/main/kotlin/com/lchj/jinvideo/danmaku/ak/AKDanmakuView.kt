@@ -74,6 +74,9 @@ class AKDanmakuView(context: Context?, private val danmakuUrl: String, args: Map
     // 是否显示彩色弹幕
     private var colorsDanmakuVisibility: Boolean = true
 
+    // 解析完是否直接启动
+    private var isStart: Boolean = true
+
     init {
         overlappingEnable = MapUtils.getBoolean(args, "overlappingEnable", overlappingEnable)
         fontSize = MapUtils.getFloat(args, "fontSize", fontSize)
@@ -84,6 +87,7 @@ class AKDanmakuView(context: Context?, private val danmakuUrl: String, args: Map
         specialDanmakuVisibility = MapUtils.getBoolean(args, "specialDanmakuVisibility", specialDanmakuVisibility)
         mDuplicateMergingEnable = MapUtils.getBoolean(args, "mDuplicateMergingEnable", mDuplicateMergingEnable)
         colorsDanmakuVisibility = MapUtils.getBoolean(args, "colorsDanmakuVisibility", colorsDanmakuVisibility)
+        isStart = MapUtils.getBoolean(args, "isStart", isStart)
         config = DanmakuConfig().apply {
             dataFilter = createDataFilters()
             dataFilters = dataFilter.associateBy { it.filterParams }
@@ -92,12 +96,37 @@ class AKDanmakuView(context: Context?, private val danmakuUrl: String, args: Map
             allowOverlap = overlappingEnable
             timeFactor = danmakuSpeed
         }
+        if (!fixedTopDanmakuVisibility) {
+            (dataFilters[DanmakuFilters.FILTER_TYPE_TYPE] as? TypeFilter)?.let { filter ->
+                filter.addFilterItem(DanmakuItemData.DANMAKU_MODE_CENTER_TOP)
+                config.updateFilter()
+            }
+        }
+        if (!fixedBottomDanmakuVisibility) {
+            (dataFilters[DanmakuFilters.FILTER_TYPE_TYPE] as? TypeFilter)?.let { filter ->
+                filter.addFilterItem(DanmakuItemData.DANMAKU_MODE_CENTER_BOTTOM)
+                config.updateFilter()
+            }
+        }
+        if (!rollDanmakuVisibility) {
+            (dataFilters[DanmakuFilters.FILTER_TYPE_TYPE] as? TypeFilter)?.let { filter ->
+                filter.addFilterItem(DanmakuItemData.DANMAKU_MODE_ROLLING)
+                config.updateFilter()
+            }
+        }
+        if (!colorsDanmakuVisibility) {
+            colorFilter.filterColor.clear()
+            colorFilter.filterColor.add(0xFFFFFF)
+            config.updateFilter()
+        }
         danmakuView = DanmakuView(context)
         danmakuPlayer = DanmakuPlayer(simpleRenderer).also {
             it.bindView(danmakuView)
         }
         mainHandler.sendEmptyMessageDelayed(MSG_UPDATE_DATA, 2000)
-        mainHandler.sendEmptyMessageDelayed(MSG_START, 2500)
+        if (isStart) {
+            mainHandler.sendEmptyMessageDelayed(MSG_START, 2500)
+        }
     }
 
     override fun getView(): View {

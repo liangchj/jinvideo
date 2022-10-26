@@ -55,18 +55,11 @@ class BiliDanmakuView(
     private var danmakuSpeed : Float = 1.0f
 
     // 解析完是否直接启动
-    private var start: Boolean = true
+    private var isStart: Boolean = true
     // 是否显示FPS
     private var isShowFPS: Boolean = false
     // 是否显示缓存信息
     private var isShowCache: Boolean = false
-
-    // 解析完是否直接启动
-    private var isStart: Boolean = true
-    // 是否显示FPS
-    private var showFPS: Boolean = false
-    // 是否显示缓存信息
-    private var showCache: Boolean = false
 
     /**
      * 弹幕显示隐藏设置
@@ -91,9 +84,9 @@ class BiliDanmakuView(
         danmakuStyleStroken = MapUtils.getFloat(args, "danmakuStyleStroken", danmakuStyleStroken)
         fontSize = MapUtils.getFloat(args, "fontSize", fontSize)
         danmakuSpeed = MapUtils.getFloat(args, "danmakuSpeed", danmakuSpeed)
-        start = MapUtils.getBoolean(args, "start", start)
-        showFPS = MapUtils.getBoolean(args, "showFPS", showFPS)
-        showCache = MapUtils.getBoolean(args, "showCache", showCache)
+        isStart = MapUtils.getBoolean(args, "isStart", isStart)
+        isShowFPS = MapUtils.getBoolean(args, "isShowFPS", isShowFPS)
+        isShowCache = MapUtils.getBoolean(args, "isShowCache", isShowCache)
         fixedTopDanmakuVisibility = MapUtils.getBoolean(args, "fixedTopDanmakuVisibility", fixedTopDanmakuVisibility)
         fixedBottomDanmakuVisibility = MapUtils.getBoolean(args, "fixedBottomDanmakuVisibility", fixedBottomDanmakuVisibility)
         rollDanmakuVisibility = MapUtils.getBoolean(args, "rollDanmakuVisibility", rollDanmakuVisibility)
@@ -207,7 +200,7 @@ class BiliDanmakuView(
         }
         Log.d(LogTagUtils.BILI_DANMAKU_LOG_TAG, "mDanmakuView prepare")
         mDanmakuView.prepare(mParser, mContext)
-        if (isShowFPS) {
+        if (isShowCache) {
             mDanmakuView.showFPS(true)
         }
         if (isShowCache) {
