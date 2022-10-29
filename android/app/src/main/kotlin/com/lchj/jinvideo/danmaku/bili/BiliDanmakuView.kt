@@ -138,9 +138,10 @@ class BiliDanmakuView(
             //设置缓存绘制填充器，默认使用SimpleTextCacheStuffer只支持纯文字显示,
             // 如果需要图文混排请设置SpannedCacheStuffer 如果需要定制其他样式请扩展SimpleTextCacheStuffer|SpannedCacheStuffer
             .setCacheStuffer(SpannedCacheStuffer(), null)
-            .setMaximumLines(maxLInesPair) // 设置最大显示行数
-//            .setMaximumLines(null) // 设置最大显示行数
-            .preventOverlapping(overlappingEnablePair) // 设置防弹幕重叠
+//            .setMaximumLines(maxLInesPair) // 设置最大显示行数
+            .setMaximumLines(null) // 设置最大显示行数
+            .preventOverlapping(overlappingEnablePa
+                    ir) // 设置防弹幕重叠
 
         if (!colorsDanmakuVisibility) {
             mContext.setColorValueWhiteList(0xFFFFFF)

@@ -7,6 +7,8 @@ import 'package:jinvideo/getx_controller/play_directory_controller.dart';
 import 'package:jinvideo/getx_controller/video_file_controller.dart';
 import 'package:jinvideo/model/directory_model.dart';
 import 'package:jinvideo/model/file_model.dart';
+import 'package:jinvideo/pages/player_page.dart';
+import 'package:jinvideo/player/player_view.dart';
 import 'package:jinvideo/route/app_routes.dart';
 import 'package:jinvideo/widget/directory_item.dart';
 import 'package:jinvideo/widget/file_item.dart';
@@ -25,6 +27,8 @@ class VideoFileItem extends StatelessWidget {
       onTap: () {
         print("点击视频");
         // Get.to(ChewieVideoPlayerPage(videoUrl: fileModel.path));
+        // Get.to(PlayerPage(videoUrl: fileModel.path));
+        Get.to(PlayerView(videoUrl: fileModel.path));
       },
     );
   }

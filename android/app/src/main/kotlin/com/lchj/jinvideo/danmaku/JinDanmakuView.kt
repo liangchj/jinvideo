@@ -35,7 +35,7 @@ class JinDanmakuView(
 
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) =
         when (call.method) {
-            "startDanmaku" -> { // 启动弹幕
+            "sendDanmaku" -> { // 启动弹幕
                 val danmakuText: String? = call.argument<Long>("danmakuText") as String?
                 if (danmakuText != null && danmakuText.isNotEmpty()) {
                     DanmakuViewUtils.sendDanmaku(false, danmakuText)

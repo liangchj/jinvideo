@@ -40,6 +40,7 @@ class VideoFileListPage extends GetView<VideoFileController> {
   @override
   Widget build(BuildContext context) {
     print("创建UI UI 视频列表");
+    print("创建UI build VideoFileListPage");
     Map<String, dynamic> params = Get.arguments;
     String title = params['title'] ?? "";
     String path = params['path'] ?? "";
