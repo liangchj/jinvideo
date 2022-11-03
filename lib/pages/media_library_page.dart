@@ -4,6 +4,8 @@ import 'package:jinvideo/pages/local_video_drectory_list_page.dart';
 import 'package:jinvideo/route/app_pages.dart';
 import 'package:jinvideo/route/app_routes.dart';
 import 'package:path_provider/path_provider.dart';
+import '../ak_danmaku_test.dart';
+import '../dan_page.dart';
 import '../model/directory_model.dart';
 import '../utils/media_store_utils.dart';
 
@@ -80,7 +82,7 @@ class _MediaLibraryPageState extends State<MediaLibraryPage>
     ),
     InkWell(
       onTap: () {
-        // Get.to(const DanPage());
+        Get.to(const DanPage());
       },
       child: const ListTile(
         leading: Icon(Icons.stream_rounded),
@@ -89,7 +91,7 @@ class _MediaLibraryPageState extends State<MediaLibraryPage>
     ),
     InkWell(
       onTap: () {
-        // Get.to(const AKDanmakuTest());
+        Get.to(const AKDanmakuTest());
       },
       child: const ListTile(
         leading: Icon(Icons.boy_outlined),

@@ -525,18 +525,20 @@ class _PlayerUIState extends State<PlayerUI> {
                               crossAxisAlignment: WrapCrossAlignment.center,
                               children: [
                                 GetBuilder<PlayerGetxController>(
-                                    id: "danmakuShieldingRepeat",
+                                    id: "duplicateMergingEnabled",
                                     builder: (_) => GestureDetector(
                                           onTapDown: (details) {
                                             _playerParams
-                                                    .danmakuShieldingRepeat =
+                                                    .duplicateMergingEnabled =
                                                 !_playerParams
-                                                    .danmakuShieldingRepeat;
+                                                    .duplicateMergingEnabled;
+                                            _playerGetxController.setDuplicateMergingEnabled();
+                                            _playerGetxController.update(["duplicateMergingEnabled"]);
                                           },
                                           child: Column(
                                             children: [
                                               _playerParams
-                                                      .danmakuShieldingRepeat
+                                                      .duplicateMergingEnabled
                                                   ? const Icon(
                                                       MyIconsUtils
                                                           .repeatDanmakuOpen,
@@ -552,16 +554,18 @@ class _PlayerUIState extends State<PlayerUI> {
                                           ),
                                         )),
                                 GetBuilder<PlayerGetxController>(
-                                    id: "danmakuShieldingTop",
+                                    id: "fixedTopDanmakuVisibility",
                                     builder: (_) => GestureDetector(
                                           onTapDown: (details) {
-                                            _playerParams.danmakuShieldingTop =
+                                            _playerParams.fixedTopDanmakuVisibility =
                                                 !_playerParams
-                                                    .danmakuShieldingTop;
+                                                    .fixedTopDanmakuVisibility;
+                                            _playerGetxController.setFixedTopDanmakuVisibility();
+                                            _playerGetxController.update(["fixedTopDanmakuVisibility"]);
                                           },
                                           child: Column(
                                             children: [
-                                              _playerParams.danmakuShieldingTop
+                                              _playerParams.fixedTopDanmakuVisibility
                                                   ? const Icon(
                                                       MyIconsUtils
                                                           .topDanmakuOpen,
@@ -577,16 +581,18 @@ class _PlayerUIState extends State<PlayerUI> {
                                           ),
                                         )),
                                 GetBuilder<PlayerGetxController>(
-                                    id: "danmakuShieldingRoll",
+                                    id: "rollDanmakuVisibility",
                                     builder: (_) => GestureDetector(
                                           onTapDown: (details) {
-                                            _playerParams.danmakuShieldingRoll =
+                                            _playerParams.rollDanmakuVisibility =
                                                 !_playerParams
-                                                    .danmakuShieldingRoll;
+                                                    .rollDanmakuVisibility;
+                                            _playerGetxController.setRollDanmakuVisibility();
+                                            _playerGetxController.update(["rollDanmakuVisibility"]);
                                           },
                                           child: Column(
                                             children: [
-                                              _playerParams.danmakuShieldingRoll
+                                              _playerParams.rollDanmakuVisibility
                                                   ? const Icon(
                                                       MyIconsUtils
                                                           .rollDanmakuOpen,
@@ -602,18 +608,20 @@ class _PlayerUIState extends State<PlayerUI> {
                                           ),
                                         )),
                                 GetBuilder<PlayerGetxController>(
-                                    id: "danmakuShieldingBottom",
+                                    id: "fixedBottomDanmakuVisibility",
                                     builder: (_) => GestureDetector(
                                           onTapDown: (details) {
                                             _playerParams
-                                                    .danmakuShieldingBottom =
+                                                    .fixedBottomDanmakuVisibility =
                                                 !_playerParams
-                                                    .danmakuShieldingBottom;
+                                                    .fixedBottomDanmakuVisibility;
+                                            _playerGetxController.setFixedBottomDanmakuVisibility();
+                                            _playerGetxController.update(["fixedBottomDanmakuVisibility"]);
                                           },
                                           child: Column(
                                             children: [
                                               _playerParams
-                                                      .danmakuShieldingBottom
+                                                      .fixedBottomDanmakuVisibility
                                                   ? const Icon(
                                                       MyIconsUtils
                                                           .bottomDanmakuOpen,
@@ -629,18 +637,20 @@ class _PlayerUIState extends State<PlayerUI> {
                                           ),
                                         )),
                                 GetBuilder<PlayerGetxController>(
-                                    id: "danmakuShieldingColour",
+                                    id: "colorsDanmakuVisibility",
                                     builder: (_) => GestureDetector(
                                           onTapDown: (details) {
                                             _playerParams
-                                                    .danmakuShieldingColour =
+                                                    .colorsDanmakuVisibility =
                                                 !_playerParams
-                                                    .danmakuShieldingColour;
+                                                    .colorsDanmakuVisibility;
+                                            _playerGetxController.setColorsDanmakuVisibility();
+                                            _playerGetxController.update(["colorsDanmakuVisibility"]);
                                           },
                                           child: Column(
                                             children: [
                                               _playerParams
-                                                      .danmakuShieldingColour
+                                                      .colorsDanmakuVisibility
                                                   ? const Icon(
                                                       MyIconsUtils
                                                           .colorDanmakuOpen,
@@ -712,7 +722,7 @@ class _PlayerUIState extends State<PlayerUI> {
                             width: double.infinity,
                             child: ElevatedButton(
                               onPressed: () =>
-                                  _playerGetxController.seekToDanmaKu(),
+                                  _playerGetxController.danmakuSeekTo(),
                               style: ButtonStyle(
                                   shape: MaterialStateProperty.all(
                                     RoundedRectangleBorder(
@@ -981,7 +991,7 @@ class _PlayerUIState extends State<PlayerUI> {
                       onChanged: (value) {
                         _playerParams.danmakuFontSize = value.toInt();
                         _playerGetxController.update(["danmakuFontSizeSetting"]);
-                        _playerGetxController.setDanmakuFontSize();
+                        _playerGetxController.setDanmakuScaleTextSize();
                       },
                     )),
               ),
@@ -1046,7 +1056,7 @@ class _PlayerUIState extends State<PlayerUI> {
                       onChanged: (value) {
                         _playerParams.danmakuSpeed = value.toInt();
                         _playerGetxController.update(["danmakuSpeedSetting"]);
-                        _playerGetxController.setDanmakuScrollSpeedFactor();
+                        _playerGetxController.setDanmakuSpeed();
                       },
                     )),
               ),

@@ -91,7 +91,7 @@ class BiliDanmakuView(
         fixedBottomDanmakuVisibility = MapUtils.getBoolean(args, "fixedBottomDanmakuVisibility", fixedBottomDanmakuVisibility)
         rollDanmakuVisibility = MapUtils.getBoolean(args, "rollDanmakuVisibility", rollDanmakuVisibility)
         specialDanmakuVisibility = MapUtils.getBoolean(args, "specialDanmakuVisibility", specialDanmakuVisibility)
-        mDuplicateMergingEnable = MapUtils.getBoolean(args, "mDuplicateMergingEnable", mDuplicateMergingEnable)
+        mDuplicateMergingEnable = MapUtils.getBoolean(args, "duplicateMergingEnabled", mDuplicateMergingEnable)
         colorsDanmakuVisibility = MapUtils.getBoolean(args, "colorsDanmakuVisibility", colorsDanmakuVisibility)
 
         mDanmakuView = DanmakuView(context)
@@ -140,8 +140,7 @@ class BiliDanmakuView(
             .setCacheStuffer(SpannedCacheStuffer(), null)
 //            .setMaximumLines(maxLInesPair) // 设置最大显示行数
             .setMaximumLines(null) // 设置最大显示行数
-            .preventOverlapping(overlappingEnablePa
-                    ir) // 设置防弹幕重叠
+            .preventOverlapping(overlappingEnablePair) // 设置防弹幕重叠
 
         if (!colorsDanmakuVisibility) {
             mContext.setColorValueWhiteList(0xFFFFFF)
@@ -276,7 +275,8 @@ class BiliDanmakuView(
     override fun setDanmakuScaleTextSize(fontSize: Int) {
         if (mDanmakuView.isPrepared) {
             try {
-                mContext.setScaleTextSize(fontSize.toFloat())
+                var fontSizeRatio = (fontSize / 100).toFloat()
+                mContext.setScaleTextSize(fontSizeRatio)
             } catch (e: Exception) {
                 Log.e(LogTagUtils.BILI_DANMAKU_LOG_TAG, "setDanmakuScaleTextSize error: $e")
             }

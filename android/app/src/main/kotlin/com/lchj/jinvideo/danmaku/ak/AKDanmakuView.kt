@@ -85,7 +85,7 @@ class AKDanmakuView(context: Context?, private val danmakuUrl: String, args: Map
         fixedBottomDanmakuVisibility = MapUtils.getBoolean(args, "fixedBottomDanmakuVisibility", fixedBottomDanmakuVisibility)
         rollDanmakuVisibility = MapUtils.getBoolean(args, "rollDanmakuVisibility", rollDanmakuVisibility)
         specialDanmakuVisibility = MapUtils.getBoolean(args, "specialDanmakuVisibility", specialDanmakuVisibility)
-        mDuplicateMergingEnable = MapUtils.getBoolean(args, "mDuplicateMergingEnable", mDuplicateMergingEnable)
+        mDuplicateMergingEnable = MapUtils.getBoolean(args, "duplicateMergingEnabled", mDuplicateMergingEnable)
         colorsDanmakuVisibility = MapUtils.getBoolean(args, "colorsDanmakuVisibility", colorsDanmakuVisibility)
         isStart = MapUtils.getBoolean(args, "isStart", isStart)
         config = DanmakuConfig().apply {
@@ -373,9 +373,9 @@ class AKDanmakuView(context: Context?, private val danmakuUrl: String, args: Map
     /**
      * 设置弹幕文字大小
      */
-    override fun setDanmakuScaleTextSize(danmakuFontSizeRatio: Int) {
+    override fun setDanmakuScaleTextSize(fontSize: Int) {
         try {
-            var fontSizeRatio = (danmakuFontSizeRatio / 100).toFloat()
+            var fontSizeRatio = (fontSize / 100).toFloat()
             config = config.copy(textSizeScale = fontSizeRatio)
             danmakuPlayer.updateConfig(config)
         } catch (e: Exception) {

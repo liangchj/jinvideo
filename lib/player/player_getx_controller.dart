@@ -134,7 +134,7 @@ class PlayerGetxController extends GetxController {
   /// 视频跳转
   Future<void> seekTo(Duration position) async {
     playerMethod.seekTo(position).then((value) {
-      seekToDanmaKu();
+      danmakuSeekTo();
     });
   }
 
@@ -293,8 +293,13 @@ class PlayerGetxController extends GetxController {
                 "danmakuType": "BILI",
                 "isShowFPS": false,
                 "isShowCache": false,
-                "colorsDanmakuVisibility": true,
-                "isStart": false
+                "isStart": playerParams.isPlaying,
+                "fixedTopDanmakuVisibility": playerParams.fixedTopDanmakuVisibility,
+                "fixedBottomDanmakuVisibility": playerParams.fixedBottomDanmakuVisibility,
+                "rollDanmakuVisibility": playerParams.rollDanmakuVisibility,
+                "specialDanmakuVisibility": playerParams.specialDanmakuVisibility,
+                "duplicateMergingEnabled": playerParams.duplicateMergingEnabled,
+                "colorsDanmakuVisibility": playerParams.colorsDanmakuVisibility,
               },
               creationParamsCodec: const StandardMessageCodec(),
               hitTestBehavior: PlatformViewHitTestBehavior.transparent,
@@ -353,11 +358,11 @@ class PlayerGetxController extends GetxController {
   }
 
   /// 弹幕跳转
-  Future<void> seekToDanmaKu({Duration? duration}) async {
+  Future<void> danmakuSeekTo({Duration? duration}) async {
     var to = (duration ?? playerParams.positionDuration).inMilliseconds.toString();
     if (playerParams.danmakuUI != null && playerParams.danmakuUICreateSuccess) {
       var result = await playerParams.platform.invokeMethod(
-          'seekToDanmaKu', {'time': to});
+          'danmaKuSeekTo', {'time': to});
       print("跳转弹幕状态：$result");
       if (result && !playerParams.isPlaying) {
         // 因弹幕引擎在跳转时重新绘制出现，因此跳转后延迟300毫秒在停止
@@ -367,7 +372,7 @@ class PlayerGetxController extends GetxController {
   }
 
   /// 设置弹幕滚动速度
-  Future<void> setDanmakuScrollSpeedFactor() async {
+  Future<void> setDanmakuSpeed() async {
     double speedRatio = playerParams.playSpeed * PlayerConfig.danmakuSpeedList[playerParams.danmakuSpeed];
     print("计算后的弹幕速度系数: $speedRatio");
     if (playerParams.danmakuUI != null && playerParams.danmakuUICreateSuccess) {
@@ -376,11 +381,54 @@ class PlayerGetxController extends GetxController {
   }
 
   /// 设置弹幕字体大小
-  Future<void> setDanmakuFontSize() async {
-    double danmakuFontSizeRatio = playerParams.danmakuFontSize / 100.0;
+  Future<void> setDanmakuScaleTextSize() async {
     if (playerParams.danmakuUI != null && playerParams.danmakuUICreateSuccess) {
-      return await playerParams.platform.invokeMethod('setScaleTextSize', {'danmakuFontSizeRatio': danmakuFontSizeRatio});
+      return await playerParams.platform.invokeMethod('setDanmakuScaleTextSize', {'danmakuFontSize': playerParams.danmakuFontSize});
     }
   }
+
+  /// 设置是否启用合并重复弹幕
+  Future<void> setDuplicateMergingEnabled() async {
+    if (playerParams.danmakuUI != null && playerParams.danmakuUICreateSuccess) {
+      return await playerParams.platform.invokeMethod('setDuplicateMergingEnabled', {"flag": playerParams.duplicateMergingEnabled});
+    }
+  }
+
+  /// 设置是否显示顶部固定弹幕
+  Future<void> setFixedTopDanmakuVisibility() async {
+    if (playerParams.danmakuUI != null && playerParams.danmakuUICreateSuccess) {
+      return await playerParams.platform.invokeMethod('setFixedTopDanmakuVisibility', {"visible": playerParams.fixedTopDanmakuVisibility});
+    }
+  }
+
+  /// 设置是否显示滚动弹幕
+  Future<void> setFixedBottomDanmakuVisibility() async {
+    if (playerParams.danmakuUI != null && playerParams.danmakuUICreateSuccess) {
+      return await playerParams.platform.invokeMethod('setFixedBottomDanmakuVisibility', {"visible": playerParams.fixedBottomDanmakuVisibility});
+    }
+  }
+  /// 设置是否显示滚动弹幕
+  Future<void> setRollDanmakuVisibility() async {
+    if (playerParams.danmakuUI != null && playerParams.danmakuUICreateSuccess) {
+      print("修改滚动弹幕显示:${playerParams.rollDanmakuVisibility}");
+      var r = await playerParams.platform.invokeMethod('setRollDanmakuVisibility', {"visible": playerParams.rollDanmakuVisibility});
+      print("修改滚动弹幕显示:$r");
+    }
+  }
+
+  /// 设置是否显示特殊弹幕
+  Future<void> setSpecialDanmakuVisibility() async {
+    if (playerParams.danmakuUI != null && playerParams.danmakuUICreateSuccess) {
+      return await playerParams.platform.invokeMethod('setSpecialDanmakuVisibility', {"visible": playerParams.specialDanmakuVisibility});
+    }
+  }
+
+  /// 是否显示彩色弹幕
+  Future<void> setColorsDanmakuVisibility() async {
+    if (playerParams.danmakuUI != null && playerParams.danmakuUICreateSuccess) {
+      return await playerParams.platform.invokeMethod('setColorsDanmakuVisibility', {"visible": playerParams.colorsDanmakuVisibility});
+    }
+  }
+
 
 }

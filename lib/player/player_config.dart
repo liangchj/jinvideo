@@ -26,11 +26,12 @@ class PlayerConfig {
   // static List<double> danmakuSpeedList = [1.5, 1.25, 1.0, 0.75, 0.5]; // 不知为何速度系数是反着来的的
 
   // 弹幕屏蔽类型
-  static bool danmakuShieldingRepeat = false; // 屏蔽重复
-  static bool danmakuShieldingTop = false; // 屏蔽顶部
-  static bool danmakuShieldingBottom = false; // 屏蔽底部
-  static bool danmakuShieldingRoll = false; // 屏蔽滚动
-  static bool danmakuShieldingColour = false; // 屏蔽彩色
+  static bool duplicateMergingEnabled = true; // 是否合并重复
+  static bool fixedTopDanmakuVisibility = true; // 顶部是否显示
+  static bool fixedBottomDanmakuVisibility = true; // 底部是否显示
+  static bool rollDanmakuVisibility = true; // 滚动是否显示
+  static bool colorsDanmakuVisibility = true; // 彩色是否显示
+  static bool specialDanmakuVisibility = true; // 特殊弹幕是否显示
 
   // 开启屏蔽词
   static bool openDanmakuShieldingWord = false;

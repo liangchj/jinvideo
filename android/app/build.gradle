@@ -78,4 +78,5 @@ dependencies {
 
     // 快手/acfun 弹幕
     implementation 'com.kuaishou:akdanmaku:1.0.3'
+
 }

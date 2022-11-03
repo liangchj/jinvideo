@@ -68,14 +68,16 @@ class PlayerParams {
   int danmakuSpeed = 2;
 
   // 弹幕屏蔽类型
-  bool danmakuShieldingRepeat =
-      PlayerConfig.danmakuShieldingRepeat; // 屏蔽重复
-  bool danmakuShieldingTop = PlayerConfig.danmakuShieldingTop; // 屏蔽顶部
-  bool danmakuShieldingBottom =
-      PlayerConfig.danmakuShieldingBottom; // 屏蔽底部
-  bool danmakuShieldingRoll = PlayerConfig.danmakuShieldingRoll; // 屏蔽滚动
-  bool danmakuShieldingColour =
-      PlayerConfig.danmakuShieldingColour; // 屏蔽彩色
+  bool duplicateMergingEnabled =
+      PlayerConfig.duplicateMergingEnabled; // 是否合并重复
+  bool fixedTopDanmakuVisibility = PlayerConfig.fixedTopDanmakuVisibility; // 顶部是否显示
+  bool fixedBottomDanmakuVisibility =
+      PlayerConfig.fixedBottomDanmakuVisibility; // 底部是否显示
+  bool rollDanmakuVisibility = PlayerConfig.rollDanmakuVisibility; // 滚动是否显示
+  bool colorsDanmakuVisibility =
+      PlayerConfig.colorsDanmakuVisibility; // 彩色是否显示
+  bool specialDanmakuVisibility =
+      PlayerConfig.specialDanmakuVisibility; // 特殊弹幕是否显示
 
   // 弹幕调整时间(秒)
   double danmakuAdjustTime = 0.0;

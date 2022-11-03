@@ -79,19 +79,22 @@ class _PlayerViewState extends State<PlayerView> {
           return Future(() => true);
         },
         child: SafeArea(
-          child: Center(
-            child: Stack(
-              children: [
-                Center(
-                  child: _buildHorizontalScreenPlayerView(),
-                ),
-                GetBuilder<PlayerGetxController>(
-                    id: "playerView",
-                    builder: (_) {
-                      return _.playerParams.danmakuUI ?? Container();
-                    }),
-                const Positioned.fill(child: PlayerUI(),),
-              ],
+          child: Container(
+            color: Colors.black,
+            child: Center(
+              child: Stack(
+                children: [
+                  Center(
+                    child: _buildHorizontalScreenPlayerView(),
+                  ),
+                  GetBuilder<PlayerGetxController>(
+                      id: "playerView",
+                      builder: (_) {
+                        return _.playerParams.danmakuUI ?? Container();
+                      }),
+                  const Positioned.fill(child: PlayerUI(),),
+                ],
+              ),
             ),
           ),
         ),
