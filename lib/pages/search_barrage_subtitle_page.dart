@@ -245,13 +245,20 @@ class SearchBarrageSubtitlePage extends GetView<SearchBarrageSubtitleController>
           if (open) {
             Get.back();
           }
-          getExternalStorageDirectory().then((value) => Get.bottomSheet(
+          Get.bottomSheet(
+              _selectLocalBarrage(fileModel, Directory(fileModel.directory)),
+              backgroundColor: Colors.white,
+              shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadiusDirectional.only(
+                      topStart: Radius.circular(10),
+                      topEnd: Radius.circular(10))));
+          /*getExternalStorageDirectory().then((value) => Get.bottomSheet(
               _selectLocalBarrage(fileModel, value),
               backgroundColor: Colors.white,
               shape: const RoundedRectangleBorder(
                   borderRadius: BorderRadiusDirectional.only(
                       topStart: Radius.circular(10),
-                      topEnd: Radius.circular(10)))));
+                      topEnd: Radius.circular(10)))));*/
           /*Get.bottomSheet(
               _selectLocalBarrage(fileModel),
               backgroundColor: Colors.white,

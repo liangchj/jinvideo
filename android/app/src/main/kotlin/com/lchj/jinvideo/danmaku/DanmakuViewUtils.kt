@@ -5,6 +5,7 @@ import android.content.Context
 import android.util.Log
 import android.view.View
 import com.lchj.jinvideo.danmaku.ak.AKDanmakuView
+import com.lchj.jinvideo.danmaku.bili.BiliDanmakuSurfaceView
 import com.lchj.jinvideo.danmaku.bili.BiliDanmakuView
 import com.lchj.jinvideo.utils.LogTagUtils
 import org.apache.commons.collections4.MapUtils
@@ -12,6 +13,7 @@ import org.apache.commons.collections4.MapUtils
 @SuppressLint("StaticFieldLeak")
 object DanmakuViewUtils {
     private var biliDanmakuView : BiliDanmakuView? = null
+//    private var biliDanmakuView : BiliDanmakuSurfaceView? = null
     private var akDanmakuView : AKDanmakuView? = null
     // AndroidView
     private var danmakuView : View? = null
@@ -43,6 +45,7 @@ object DanmakuViewUtils {
                     biliDanmakuViewDispose() // 先将之前创建的清除
                     danmakuView = null
                     biliDanmakuView = BiliDanmakuView(context, danmakuUrl, args)
+//                    biliDanmakuView = BiliDanmakuSurfaceView(context, danmakuUrl, args)
                 }
                 akDanmakuViewDispose() // 创建哔哩哔哩view，因此要销毁AK弹幕
                 danmakuView = biliDanmakuView?.getView()
@@ -97,7 +100,7 @@ object DanmakuViewUtils {
     }
 
     /**
-     * 开启弹幕
+     * 开始弹幕
      */
     fun startDanmaku(position: Long?) {
         try {
@@ -179,21 +182,6 @@ object DanmakuViewUtils {
     }
 
     /**
-     * 显示或隐藏
-     */
-    fun setDanmaKuVisibility(visible: Boolean) {
-        try {
-            if (danmakuType == DanmakuType.BILI) {
-                biliDanmakuView?.setDanmaKuVisibility(visible)
-            }
-            else if (danmakuType == DanmakuType.AK) {
-                akDanmakuView?.setDanmaKuVisibility(visible)
-            }
-        } catch (e: Exception) {
-            Log.e(LogTagUtils.DANMAKU_UTILS_LOG_TAG, "setDanmaKuVisibility 失败：$e")
-        }
-    }
-    /**
      * 弹幕跳转
      */
     fun danmaKuSeekTo(position: Long) {
@@ -208,68 +196,100 @@ object DanmakuViewUtils {
             Log.e(LogTagUtils.DANMAKU_UTILS_LOG_TAG, "danmaKuSeekTo 失败：$e")
         }
     }
+
     /**
-     * 设置弹幕滚动速度
+     * 显示或隐藏
      */
-    fun setDanmakuSpeed(speed: Float?) {
-        if (speed == null) {
-            return
-        }
+    fun setDanmaKuVisibility(visible: Boolean) {
         try {
             if (danmakuType == DanmakuType.BILI) {
-                biliDanmakuView?.setDanmakuSpeed(speed)
+                biliDanmakuView?.setDanmaKuVisibility(visible)
             }
             else if (danmakuType == DanmakuType.AK) {
-                akDanmakuView?.setDanmakuSpeed(speed)
+                akDanmakuView?.setDanmaKuVisibility(visible)
             }
         } catch (e: Exception) {
-            Log.e(LogTagUtils.DANMAKU_UTILS_LOG_TAG, "setDanmakuSpeed 失败：$e")
+            Log.e(LogTagUtils.DANMAKU_UTILS_LOG_TAG, "setDanmaKuVisibility 失败：$e")
+        }
+    }
+
+    /**
+     * 设置弹幕透明的（百分比）
+     */
+    fun setDanmakuAlphaRatio(danmakuAlphaRatio: Int) {
+        try {
+            if (danmakuType == DanmakuType.BILI) {
+                biliDanmakuView?.setDanmakuAlphaRatio(danmakuAlphaRatio)
+            }
+            else if (danmakuType == DanmakuType.AK) {
+                akDanmakuView?.setDanmakuAlphaRatio(danmakuAlphaRatio)
+            }
+        } catch (e: Exception) {
+            Log.e(LogTagUtils.DANMAKU_UTILS_LOG_TAG, "setDanmakuAlphaRatio 失败：$e")
         }
     }
     /**
-     * 设置弹幕文字大小
+     * 设置显示区域（区域下标）
      */
-    fun setDanmakuScaleTextSize(fontSize: Int?) {
-        if (fontSize == null) {
+    fun setDanmakuDisplayArea(danmakuDisplayAreaIndex: Int) {
+        try {
+            if (danmakuType == DanmakuType.BILI) {
+                biliDanmakuView?.setDanmakuDisplayArea(danmakuDisplayAreaIndex)
+            }
+            else if (danmakuType == DanmakuType.AK) {
+                akDanmakuView?.setDanmakuDisplayArea(danmakuDisplayAreaIndex)
+            }
+        } catch (e: Exception) {
+            Log.e(LogTagUtils.DANMAKU_UTILS_LOG_TAG, "setDanmakuDisplayArea 失败：$e")
+        }
+    }
+    /**
+     * 设置弹幕文字大小（百分比）
+     */
+    fun setDanmakuScaleTextSize(danmakuFontSizeRatio: Int) {
+        Log.e(LogTagUtils.DANMAKU_UTILS_LOG_TAG, "setDanmakuScaleTextSize util fontSize： $danmakuFontSizeRatio")
+        if (danmakuFontSizeRatio == null) {
             return
         }
         try {
+            Log.e(LogTagUtils.DANMAKU_UTILS_LOG_TAG, "setDanmakuScaleTextSize util danmakuType: ${danmakuType}： ${danmakuType == DanmakuType.BILI}")
             if (danmakuType == DanmakuType.BILI) {
-                biliDanmakuView?.setDanmakuScaleTextSize(fontSize)
+                biliDanmakuView?.setDanmakuScaleTextSize(danmakuFontSizeRatio)
             }
             else if (danmakuType == DanmakuType.AK) {
-                akDanmakuView?.setDanmakuScaleTextSize(fontSize)
+                akDanmakuView?.setDanmakuScaleTextSize(danmakuFontSizeRatio)
             }
         } catch (e: Exception) {
             Log.e(LogTagUtils.DANMAKU_UTILS_LOG_TAG, "setDanmakuScaleTextSize 失败：$e")
         }
     }
+
     /**
-     * 设置最大显示行数
+     * 设置弹幕滚动速度
      */
-    fun setDanmakuMaximumLines(areaIndex: Int) {
+    fun setDanmakuSpeed(danmakuSpeedIndex: Int, playSpeed: Float) {
         try {
             if (danmakuType == DanmakuType.BILI) {
-                biliDanmakuView?.setDanmakuMaximumLines(areaIndex)
+                biliDanmakuView?.setDanmakuSpeed(danmakuSpeedIndex, playSpeed)
             }
             else if (danmakuType == DanmakuType.AK) {
-                akDanmakuView?.setDanmakuMaximumLines(areaIndex)
+                akDanmakuView?.setDanmakuSpeed(danmakuSpeedIndex, playSpeed)
             }
         } catch (e: Exception) {
-            Log.e(LogTagUtils.DANMAKU_UTILS_LOG_TAG, "setDanmakuMaximumLines 失败：$e")
+            Log.e(LogTagUtils.DANMAKU_UTILS_LOG_TAG, "setDanmakuSpeed 失败：$e")
         }
     }
 
     /**
      * 设置是否启用合并重复弹幕
      */
-    fun setDuplicateMergingEnabled(flag: Boolean) {
+    fun setDuplicateMergingEnabled(merge: Boolean) {
         try {
             if (danmakuType == DanmakuType.BILI) {
-                biliDanmakuView?.setDuplicateMergingEnabled(flag)
+                biliDanmakuView?.setDuplicateMergingEnabled(merge)
             }
             else if (danmakuType == DanmakuType.AK) {
-                akDanmakuView?.setDuplicateMergingEnabled(flag)
+                akDanmakuView?.setDuplicateMergingEnabled(merge)
             }
         } catch (e: Exception) {
             Log.e(LogTagUtils.DANMAKU_UTILS_LOG_TAG, "setDuplicateMergingEnabled 失败：$e")
@@ -294,6 +314,24 @@ object DanmakuViewUtils {
     }
 
     /**
+     * 设置是否显示滚动弹幕
+     */
+    fun setRollDanmakuVisibility(visible: Boolean) {
+        try {
+            Log.d(LogTagUtils.DANMAKU_UTILS_LOG_TAG, "setRollDanmakuVisibility visible：$visible, danmakuType:$danmakuType, ${danmakuType == DanmakuType.BILI}")
+            if (danmakuType == DanmakuType.BILI) {
+                Log.d(LogTagUtils.DANMAKU_UTILS_LOG_TAG, "setRollDanmakuVisibility util entry, biliDanmakuView: $biliDanmakuView")
+                biliDanmakuView?.setRollDanmakuVisibility(visible)
+            }
+            else if (danmakuType == DanmakuType.AK) {
+                akDanmakuView?.setRollDanmakuVisibility(visible)
+            }
+        } catch (e: Exception) {
+            Log.e(LogTagUtils.DANMAKU_UTILS_LOG_TAG, "setRollDanmakuVisibility 失败：$e")
+        }
+    }
+
+    /**
      * 设置是否显示底部固定弹幕
      */
     fun setFixedBottomDanmakuVisibility(visible: Boolean) {
@@ -306,22 +344,6 @@ object DanmakuViewUtils {
             }
         } catch (e: Exception) {
             Log.e(LogTagUtils.DANMAKU_UTILS_LOG_TAG, "setFixedBottomDanmakuVisibility 失败：$e")
-        }
-    }
-
-    /**
-     * 设置是否显示滚动弹幕
-     */
-    fun setRollDanmakuVisibility(visible: Boolean) {
-        try {
-            if (danmakuType == DanmakuType.BILI) {
-                biliDanmakuView?.setRollDanmakuVisibility(visible)
-            }
-            else if (danmakuType == DanmakuType.AK) {
-                akDanmakuView?.setRollDanmakuVisibility(visible)
-            }
-        } catch (e: Exception) {
-            Log.e(LogTagUtils.DANMAKU_UTILS_LOG_TAG, "setRollDanmakuVisibility 失败：$e")
         }
     }
 
@@ -356,5 +378,8 @@ object DanmakuViewUtils {
             Log.e(LogTagUtils.DANMAKU_UTILS_LOG_TAG, "setColorsDanmakuVisibility 失败：$e")
         }
     }
+
+
+
 
 }

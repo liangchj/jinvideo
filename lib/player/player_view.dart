@@ -12,7 +12,7 @@ class PlayerView extends StatefulWidget {
       {Key? key,
         required this.videoUrl,
         this.cover,
-        this.autoPlay,
+        this.autoPlay = true,
         this.looping,
         this.aspectRatio,
         this.fullScreenPlay = true,
@@ -55,6 +55,7 @@ class _PlayerViewState extends State<PlayerView> {
 
   @override
   void dispose() {
+    // _playerGetxController.playerParams.danmakuUI = null;
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
@@ -70,6 +71,10 @@ class _PlayerViewState extends State<PlayerView> {
     return OrientationBuilder(builder: (context, orientation) {
       return WillPopScope(
         onWillPop: () async {
+          if (_playerGetxController.haveUIShow()) {
+            _playerGetxController.hideAllUI();
+            return Future(() => false);
+          }
           await SystemChrome.setPreferredOrientations([
             DeviceOrientation.portraitUp,
             DeviceOrientation.portraitDown,

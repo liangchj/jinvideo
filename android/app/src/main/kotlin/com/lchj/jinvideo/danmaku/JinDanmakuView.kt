@@ -36,76 +36,170 @@ class JinDanmakuView(
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) =
         when (call.method) {
             "sendDanmaku" -> { // 发送弹幕
-                val danmakuText: String? = call.argument<Long>("danmakuText") as String?
-                if (danmakuText != null && danmakuText.isNotEmpty()) {
-                    DanmakuViewUtils.sendDanmaku(false, danmakuText)
+                try {
+                    val danmakuText: String? = call.argument<Long>("danmakuText") as String?
+                    if (danmakuText != null && danmakuText.isNotEmpty()) {
+                        DanmakuViewUtils.sendDanmaku(false, danmakuText)
+                    }
+                    result.success(true)
+                } catch (e: Exception) {
+                    Log.e(LogTagUtils.DANMAKU_ANDROID_VIEW_LOG_TAG, "sendDanmaku error: $e")
+                    result.success(false)
                 }
-                result.success(true)
             }
             "startDanmaku" -> { // 启动弹幕
-                val msStr = call.argument<Long>("time") as String?
-                DanmakuViewUtils.startDanmaku(if (msStr != null && msStr.isNotEmpty()) msStr.toLong() else null)
-                result.success(true)
+                try {
+                    val msStr = call.argument<Long>("time") as String?
+                    DanmakuViewUtils.startDanmaku(if (msStr != null && msStr.isNotEmpty()) msStr.toLong() else null)
+                    result.success(true)
+                } catch (e: Exception) {
+                    Log.e(LogTagUtils.DANMAKU_ANDROID_VIEW_LOG_TAG, "startDanmaku error: $e")
+                    result.success(false)
+                }
             }
             "pauseDanmaKu" -> { // 暂停弹幕
-                DanmakuViewUtils.pauseDanmaKu()
-                result.success(true)
+                try {
+                    DanmakuViewUtils.pauseDanmaKu()
+                    result.success(true)
+                } catch (e: Exception) {
+                    Log.e(LogTagUtils.DANMAKU_ANDROID_VIEW_LOG_TAG, "pauseDanmaKu error: $e")
+                    result.success(false)
+                }
             }
             "resumeDanmaku" -> { // 继续弹幕
-                DanmakuViewUtils.resumeDanmaku()
-                result.success(true)
-            }
-            "showDanmaKu" -> { // 显示弹幕
-                DanmakuViewUtils.setDanmaKuVisibility(true)
-                result.success(true)
-            }
-            "hideDanmaKu" -> { // 隐藏弹幕
-                DanmakuViewUtils.setDanmaKuVisibility(false)
-                result.success(true)
+                try {
+                    DanmakuViewUtils.resumeDanmaku()
+                    result.success(true)
+                } catch (e: Exception) {
+                    Log.e(LogTagUtils.DANMAKU_ANDROID_VIEW_LOG_TAG, "resumeDanmaku error: $e")
+                    result.success(false)
+                }
             }
             "danmaKuSeekTo" -> { // 跳转弹幕
-                val ms: String = call.argument<String>("time") as String
-                DanmakuViewUtils.danmaKuSeekTo(ms.toLong())
-                result.success(true)
+                try {
+                    val ms: String = call.argument<String>("time") as String
+                    DanmakuViewUtils.danmaKuSeekTo(ms.toLong())
+                    result.success(true)
+                } catch (e: Exception) {
+                    Log.e(LogTagUtils.DANMAKU_ANDROID_VIEW_LOG_TAG, "danmaKuSeekTo error: $e")
+                    result.success(false)
+                }
+            }
+            "setDanmaKuVisibility" -> { // 显示/隐藏弹幕
+                try {
+                    var visible: Boolean = call.argument<Boolean>("visible")  as Boolean
+                    DanmakuViewUtils.setDanmaKuVisibility(visible)
+                    result.success(true)
+                } catch (e: Exception) {
+                    Log.e(LogTagUtils.DANMAKU_ANDROID_VIEW_LOG_TAG, "setDanmaKuVisibility error: $e")
+                    result.success(false)
+                }
+            }
+            "setDanmakuAlphaRatio" -> { // 设置弹幕透明的（百分比）
+                try {
+                    val danmakuAlphaRatio: Int = call.argument<Int>("danmakuAlphaRatio") as Int
+                    DanmakuViewUtils.setDanmakuAlphaRatio(danmakuAlphaRatio)
+                    result.success(true)
+                } catch (e: Exception) {
+                    Log.e(LogTagUtils.DANMAKU_ANDROID_VIEW_LOG_TAG, "setDanmakuAlphaRatio error: $e")
+                    result.success(false)
+                }
+            }
+            "setDanmakuDisplayArea" -> { // 设置弹幕显示区域
+                try {
+                    val danmakuDisplayAreaIndex: Int = call.argument<Int>("danmakuDisplayAreaIndex") as Int
+                    DanmakuViewUtils.setDanmakuDisplayArea(danmakuDisplayAreaIndex)
+                    result.success(true)
+                } catch (e: Exception) {
+                    Log.e(LogTagUtils.DANMAKU_ANDROID_VIEW_LOG_TAG, "setDanmakuDisplayArea error: $e")
+                    result.success(false)
+                }
+            }
+            "setDanmakuScaleTextSize" -> { // 设置字体大小（百分比）
+                try {
+                    val danmakuFontSizeRatio: Int = call.argument<Int>("danmakuFontSizeRatio") as Int
+                    Log.d(LogTagUtils.DANMAKU_ANDROID_VIEW_LOG_TAG, "setDanmakuScaleTextSize danmakuFontSizeRatio: $danmakuFontSizeRatio")
+                    DanmakuViewUtils.setDanmakuScaleTextSize(danmakuFontSizeRatio)
+                    result.success(true)
+                } catch (e: Exception) {
+                    Log.e(LogTagUtils.DANMAKU_ANDROID_VIEW_LOG_TAG, "setDanmakuScaleTextSize error: $e")
+                    result.success(false)
+                }
             }
             "setDanmakuSpeed" -> { // 设置滚动速度
-                DanmakuViewUtils.setDanmakuSpeed((call.argument<Long>("speed") as Double?)?.toFloat())
-                result.success(true)
-            }
-            "setDanmakuScaleTextSize" -> { // 设置字体大小
-                val danmakuFontSize: Int? = call.argument<Int>("danmakuFontSize")
-                DanmakuViewUtils.setDanmakuScaleTextSize(danmakuFontSize)
-                result.success(true)
+                try {
+                    //播放速度
+                    val playSpeed = (call.argument<Long>("speed") as Double?)?.toFloat() ?: 1.0f
+                    // 速度下标
+                    val danmakuSpeedIndex = (call.argument<Long>("danmakuSpeedIndex")) as Int
+                    DanmakuViewUtils.setDanmakuSpeed(danmakuSpeedIndex, playSpeed)
+                    result.success(true)
+                } catch (e: Exception) {
+                    Log.e(LogTagUtils.DANMAKU_ANDROID_VIEW_LOG_TAG, "setDanmakuSpeed error: $e")
+                    result.success(false)
+                }
             }
             "setDuplicateMergingEnabled" -> { // 设置是否启用合并重复弹幕
-                var flag: Boolean = call.argument<Boolean>("flag") as Boolean
-                DanmakuViewUtils.setDuplicateMergingEnabled(flag)
-                result.success(true)
+                try {
+                    var flag: Boolean = call.argument<Boolean>("flag") as Boolean
+                    DanmakuViewUtils.setDuplicateMergingEnabled(flag)
+                    result.success(true)
+                } catch (e: Exception) {
+                    Log.e(LogTagUtils.DANMAKU_ANDROID_VIEW_LOG_TAG, "setDuplicateMergingEnabled error: $e")
+                    result.success(false)
+                }
             }
             "setFixedTopDanmakuVisibility" -> { // 设置是否显示顶部固定弹幕
-                var visible: Boolean = call.argument<Boolean>("visible")  as Boolean
-                DanmakuViewUtils.setFixedTopDanmakuVisibility(visible)
-                result.success(true)
-            }
-            "setFixedBottomDanmakuVisibility" -> { // 设置是否显示底部固定弹幕
-                var visible: Boolean = call.argument<Boolean>("visible")  as Boolean
-                DanmakuViewUtils.setFixedBottomDanmakuVisibility(visible)
-                result.success(true)
+                try {
+                    var visible: Boolean = call.argument<Boolean>("visible")  as Boolean
+                    DanmakuViewUtils.setFixedTopDanmakuVisibility(visible)
+                    result.success(true)
+                } catch (e: Exception) {
+                    Log.e(LogTagUtils.DANMAKU_ANDROID_VIEW_LOG_TAG, "setFixedTopDanmakuVisibility error: $e")
+                    result.success(false)
+                }
             }
             "setRollDanmakuVisibility" -> { // 设置是否显示滚动弹幕
-                var visible: Boolean = call.argument<Boolean>("visible")  as Boolean
-                DanmakuViewUtils.setRollDanmakuVisibility(visible)
-                result.success(true)
+                try {
+                    var visible: Boolean = call.argument<Boolean>("visible")  as Boolean
+                    Log.d(LogTagUtils.DANMAKU_ANDROID_VIEW_LOG_TAG, "setRollDanmakuVisibility visible: $visible")
+                    DanmakuViewUtils.setRollDanmakuVisibility(visible)
+                    result.success(true)
+                } catch (e: Exception) {
+                    Log.e(LogTagUtils.DANMAKU_ANDROID_VIEW_LOG_TAG, "setRollDanmakuVisibility error: $e")
+                    result.success(false)
+                }
+            }
+            "setFixedBottomDanmakuVisibility" -> { // 设置是否显示底部固定弹幕
+                try {
+                    var visible: Boolean = call.argument<Boolean>("visible")  as Boolean
+                    DanmakuViewUtils.setFixedBottomDanmakuVisibility(visible)
+                    result.success(true)
+                } catch (e: Exception) {
+                    Log.e(LogTagUtils.DANMAKU_ANDROID_VIEW_LOG_TAG, "setFixedBottomDanmakuVisibility error: $e")
+                    result.success(false)
+                }
             }
             "setSpecialDanmakuVisibility" -> { // 设置是否显示特殊弹幕
-                var visible: Boolean = call.argument<Boolean>("visible")  as Boolean
-                DanmakuViewUtils.setSpecialDanmakuVisibility(visible)
-                result.success(true)
+                try {
+                    var visible: Boolean = call.argument<Boolean>("visible")  as Boolean
+                    DanmakuViewUtils.setSpecialDanmakuVisibility(visible)
+                    result.success(true)
+                } catch (e: Exception) {
+                    Log.e(LogTagUtils.DANMAKU_ANDROID_VIEW_LOG_TAG, "setSpecialDanmakuVisibility error: $e")
+                    result.success(false)
+                }
             }
             "setColorsDanmakuVisibility" -> { // 是否显示彩色弹幕
-                var visible: Boolean = call.argument<Boolean>("visible")  as Boolean
-                DanmakuViewUtils.setColorsDanmakuVisibility(visible)
-                result.success(true)
+                try {
+                    var visible: Boolean = call.argument<Boolean>("visible")  as Boolean
+                    DanmakuViewUtils.setColorsDanmakuVisibility(visible)
+                    result.success(true)
+                } catch (e: Exception) {
+                    Log.e(LogTagUtils.DANMAKU_ANDROID_VIEW_LOG_TAG, "setColorsDanmakuVisibility error: $e")
+                    result.success(false)
+                }
+
             }
             else -> {
                 result.notImplemented()
@@ -124,7 +218,7 @@ interface IJinDanmakuView {
     fun dispose()
 
     /**
-     * 开启弹幕
+     * 开始弹幕
      */
     fun startDanmaku(position: Long?)
 
@@ -139,14 +233,14 @@ interface IJinDanmakuView {
     fun resumeDanmaku()
 
     /**
+     * 发送弹幕
+     */
+    fun sendDanmaku(isLive: Boolean, text: String)
+
+    /**
      * 获取当前弹幕时间
      */
     fun danmakuCurrentTime(): Long
-
-    /**
-     * 显示或隐藏
-     */
-    fun setDanmaKuVisibility(visible: Boolean)
 
     /**
      * 弹幕跳转
@@ -154,29 +248,34 @@ interface IJinDanmakuView {
     fun danmaKuSeekTo(position: Long)
 
     /**
+     * 显示或隐藏
+     */
+    fun setDanmaKuVisibility(visible: Boolean)
+
+    /***
+     * 设置弹幕透明的（百分比）
+     */
+    fun setDanmakuAlphaRatio(danmakuAlphaRatio: Int)
+
+    /**
+     * 设置显示区域（区域下标）
+     */
+    fun setDanmakuDisplayArea(danmakuDisplayAreaIndex: Int)
+
+    /**
+     * 设置弹幕文字大小（百分比）
+     */
+    fun setDanmakuScaleTextSize(danmakuFontSizeRatio: Int)
+
+    /**
      * 设置弹幕滚动速度
      */
-    fun setDanmakuSpeed(speed: Float)
-
-    /**
-     * 设置弹幕文字大小
-     */
-    fun setDanmakuScaleTextSize(fontSize: Int)
-
-    /**
-     * 设置最大显示行数
-     */
-    fun setDanmakuMaximumLines(areaIndex: Int)
-
-    /**
-     * 发送弹幕
-     */
-    fun sendDanmaku(isLive: Boolean, text: String)
+    fun setDanmakuSpeed(danmakuSpeedIndex: Int, playSpeed: Float)
 
     /**
      * 设置是否启用合并重复弹幕
      */
-    fun setDuplicateMergingEnabled(flag: Boolean)
+    fun setDuplicateMergingEnabled(merge: Boolean)
 
     /**
      * 设置是否显示顶部固定弹幕
@@ -184,14 +283,14 @@ interface IJinDanmakuView {
     fun setFixedTopDanmakuVisibility(visible: Boolean)
 
     /**
+     * 设置是否显示滚动弹幕
+     */
+    fun setRollDanmakuVisibility(visible: Boolean)
+
+    /**
      * 设置是否显示底部固定弹幕
      */
     fun setFixedBottomDanmakuVisibility(visible: Boolean)
-
-    /**
-     * 设置是否显示左右滚动弹幕
-     */
-    fun setRollDanmakuVisibility(visible: Boolean)
 
     /**
      * 设置是否显示特殊弹幕

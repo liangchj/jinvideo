@@ -21,6 +21,7 @@ import com.lchj.jinvideo.utils.LogTagUtils
 import org.apache.commons.collections4.MapUtils
 import java.io.File
 import java.io.FileInputStream
+import kotlin.math.acos
 import kotlin.random.Random
 
 class AKDanmakuView(context: Context?, private val danmakuUrl: String, args: Map<String, Any>) :
@@ -28,6 +29,14 @@ class AKDanmakuView(context: Context?, private val danmakuUrl: String, args: Map
     companion object {
         private const val MSG_START = 1001
         private const val MSG_UPDATE_DATA = 2001
+        // 弹幕速度列表
+        private val danmakuSpeedList: List<Float> = listOf<Float>(0.5f, 0.75f, 1.0f, 1.25f, 1.5f)
+        private const val danmakuSpeedListTotal: Int = 5
+
+        // 显示区域["1/4屏", "半屏", "3/4屏", "不重叠", "无限"]，选择下标，默认半屏（下标1）
+        // "不重叠", "无限" 显示区域都是满屏，仅重叠不一致
+        private val danmakuDisplayAreaList: List<Float> = listOf<Float>(0.25f, 0.5f, 0.75f, 1.0f, 1.0f)
+        private const val danmakuDisplayAreaListTotal: Int = 5
     }
 
     private val danmakuView: DanmakuView //by lazy { DanmakuView(context) }
@@ -51,12 +60,16 @@ class AKDanmakuView(context: Context?, private val danmakuUrl: String, args: Map
     // 弹幕配置
     private var config : DanmakuConfig
 
-    // 设置是否禁止重叠
-    private var overlappingEnable: Boolean = true
-    // 弹幕字号
-    private var fontSize : Float = 1.0f
+    // 设置是否允许重叠
+    private var allowOverlap: Boolean = true
+    // 弹幕透明度
+    private var danmakuAlphaRatio : Int = 100
+    // 显示区域
+    private var danmakuDisplayAreaIndex: Int = 3
+    // 弹幕字号（百分比）
+    private var danmakuFontSizeRatio : Int = 100
     // 弹幕速度
-    private var danmakuSpeed : Float = 1.0f
+    private var danmakuSpeedIndex : Int = 2
     /**
      * 弹幕显示隐藏设置
      */
@@ -66,10 +79,8 @@ class AKDanmakuView(context: Context?, private val danmakuUrl: String, args: Map
     private var fixedBottomDanmakuVisibility: Boolean = true
     // 是否显示滚动弹幕
     private var rollDanmakuVisibility: Boolean = true
-    // 是否显示特殊弹幕
-    private var specialDanmakuVisibility: Boolean = true
     // 是否启用合并重复弹幕
-    private var mDuplicateMergingEnable: Boolean = false
+    private var duplicateMergingEnable: Boolean = false
 
     // 是否显示彩色弹幕
     private var colorsDanmakuVisibility: Boolean = true
@@ -78,23 +89,43 @@ class AKDanmakuView(context: Context?, private val danmakuUrl: String, args: Map
     private var isStart: Boolean = true
 
     init {
-        overlappingEnable = MapUtils.getBoolean(args, "overlappingEnable", overlappingEnable)
-        fontSize = MapUtils.getFloat(args, "fontSize", fontSize)
-        danmakuSpeed = MapUtils.getFloat(args, "danmakuSpeed", danmakuSpeed)
+        danmakuAlphaRatio = MapUtils.getInteger(args, "danmakuAlphaRatio", danmakuAlphaRatio)
+        danmakuDisplayAreaIndex = MapUtils.getInteger(args, "danmakuDisplayAreaIndex", danmakuDisplayAreaIndex)
+        if (danmakuDisplayAreaIndex >= danmakuDisplayAreaListTotal) {
+            danmakuDisplayAreaIndex = danmakuDisplayAreaListTotal - 1
+        }
+        if (danmakuDisplayAreaIndex == 3 || danmakuDisplayAreaIndex == 4) {
+            allowOverlap = danmakuDisplayAreaIndex == 4
+        } else {
+            allowOverlap = true
+        }
+        danmakuFontSizeRatio = MapUtils.getInteger(args, "danmakuFontSizeRatio", danmakuFontSizeRatio)
+        danmakuSpeedIndex = MapUtils.getInteger(args, "danmakuSpeedIndex", danmakuSpeedIndex)
+        if (danmakuSpeedIndex >= danmakuSpeedListTotal) {
+            danmakuSpeedIndex = danmakuSpeedListTotal - 1
+        }
+        duplicateMergingEnable = MapUtils.getBoolean(args, "duplicateMergingEnabled", duplicateMergingEnable)
         fixedTopDanmakuVisibility = MapUtils.getBoolean(args, "fixedTopDanmakuVisibility", fixedTopDanmakuVisibility)
-        fixedBottomDanmakuVisibility = MapUtils.getBoolean(args, "fixedBottomDanmakuVisibility", fixedBottomDanmakuVisibility)
         rollDanmakuVisibility = MapUtils.getBoolean(args, "rollDanmakuVisibility", rollDanmakuVisibility)
-        specialDanmakuVisibility = MapUtils.getBoolean(args, "specialDanmakuVisibility", specialDanmakuVisibility)
-        mDuplicateMergingEnable = MapUtils.getBoolean(args, "duplicateMergingEnabled", mDuplicateMergingEnable)
+        fixedBottomDanmakuVisibility = MapUtils.getBoolean(args, "fixedBottomDanmakuVisibility", fixedBottomDanmakuVisibility)
         colorsDanmakuVisibility = MapUtils.getBoolean(args, "colorsDanmakuVisibility", colorsDanmakuVisibility)
         isStart = MapUtils.getBoolean(args, "isStart", isStart)
         config = DanmakuConfig().apply {
+            bold = false
+            alpha = danmakuAlphaRatio / 100.0f
             dataFilter = createDataFilters()
             dataFilters = dataFilter.associateBy { it.filterParams }
             layoutFilter = createLayoutFilters()
-            textSizeScale = fontSize
-            allowOverlap = overlappingEnable
-            timeFactor = danmakuSpeed
+            textSizeScale = danmakuFontSizeRatio / 100.0f
+            allowOverlap = allowOverlap
+            timeFactor = danmakuSpeedList[danmakuSpeedIndex]
+            screenPart = danmakuDisplayAreaList[danmakuDisplayAreaIndex]
+        }
+        if (duplicateMergingEnable) {
+            (dataFilters[DanmakuFilters.FILTER_TYPE_DUPLICATE_MERGED] as? TypeFilter)?.let { filter ->
+                filter.addFilterItem(DanmakuItemData.MERGED_TYPE_MERGED)
+                config.updateFilter()
+            }
         }
         if (!fixedTopDanmakuVisibility) {
             (dataFilters[DanmakuFilters.FILTER_TYPE_TYPE] as? TypeFilter)?.let { filter ->
@@ -141,6 +172,22 @@ class AKDanmakuView(context: Context?, private val danmakuUrl: String, args: Map
             Log.e(LogTagUtils.AK_DANMAKU_LOG_TAG, "销毁弹幕VIEW出错：$e")
         }
     }
+
+    /**
+     * 创建过滤
+     */
+    private fun createDataFilters(): List<DanmakuDataFilter> =
+        listOf(
+            TypeFilter(),
+            colorFilter,
+            UserIdFilter(),
+            GuestFilter(),
+            BlockedTextFilter { it == 0L },
+            DuplicateMergedFilter()
+        )
+
+    private fun createLayoutFilters(): List<DanmakuLayoutFilter> = emptyList()
+
     /**
      * 发送弹幕
      */
@@ -198,94 +245,6 @@ class AKDanmakuView(context: Context?, private val danmakuUrl: String, args: Map
             }
             Log.d(LogTagUtils.AK_DANMAKU_LOG_TAG, "数据已加载(count = $total)")
         }.start()
-    }
-
-    /**
-     * 创建过滤
-     */
-    private fun createDataFilters(): List<DanmakuDataFilter> =
-        listOf(
-            TypeFilter(),
-            colorFilter,
-            UserIdFilter(),
-            GuestFilter(),
-            BlockedTextFilter { it == 0L },
-            DuplicateMergedFilter()
-        )
-
-    private fun createLayoutFilters(): List<DanmakuLayoutFilter> = emptyList()
-    /**
-     * 设置过滤类型
-     */
-    private fun switchTypeFilter(show: Boolean, type: Int) {
-        (dataFilters[DanmakuFilters.FILTER_TYPE_TYPE] as? TypeFilter)?.let { filter ->
-            if (show) filter.removeFilterItem(type)
-            else filter.addFilterItem(type)
-            config.updateFilter()
-            Log.w(LogTagUtils.AK_DANMAKU_LOG_TAG, "[Controller] updateFilter visibility: ${config.visibility}")
-            danmakuPlayer.updateConfig(config)
-        }
-    }
-
-    /**
-     * 设置是否启用合并重复弹幕
-     */
-    override fun setDuplicateMergingEnabled(flag: Boolean) {
-
-    }
-
-    /**
-     * 设置是否显示顶部弹幕
-     */
-    override fun setFixedTopDanmakuVisibility(visible: Boolean) {
-        try {
-            switchTypeFilter(visible, DanmakuItemData.DANMAKU_MODE_CENTER_TOP)
-        } catch (e: Exception) {
-            Log.e(LogTagUtils.AK_DANMAKU_LOG_TAG, "setFTDanmakuVisibility error: $e")
-        }
-    }
-    /**
-     * 设置是否显示底部弹幕
-     */
-    override fun setFixedBottomDanmakuVisibility(visible: Boolean) {
-        try {
-            switchTypeFilter(visible, DanmakuItemData.DANMAKU_MODE_CENTER_BOTTOM)
-        } catch (e: Exception) {
-            Log.e(LogTagUtils.AK_DANMAKU_LOG_TAG, "setFBDanmakuVisibility error: $e")
-        }
-    }
-
-    /**
-     * 设置是否显示左右滚动弹幕
-     */
-    override fun setRollDanmakuVisibility(visible: Boolean) {
-        try {
-            switchTypeFilter(visible, DanmakuItemData.DANMAKU_MODE_ROLLING)
-        } catch (e: Exception) {
-            Log.e(LogTagUtils.AK_DANMAKU_LOG_TAG, "setRollDanmakuVisibility error: $e")
-        }
-    }
-    /**
-     * 设置是否显示特殊弹幕
-     */
-    override fun setSpecialDanmakuVisibility(visible: Boolean) {
-        // AK没有此功能
-    }
-
-    /**
-     * 是否显示彩色弹幕
-     */
-    override fun setColorsDanmakuVisibility(visible: Boolean) {
-        try {
-            colorFilter.filterColor.clear()
-            if (!visible) {
-                colorFilter.filterColor.add(0xFFFFFF)
-            }
-            config.updateFilter()
-            danmakuPlayer.updateConfig(config)
-        } catch (e: Exception) {
-            Log.e(LogTagUtils.AK_DANMAKU_LOG_TAG, "setColorsDanmakuVisibility error: $e")
-        }
     }
 
     /**
@@ -357,25 +316,48 @@ class AKDanmakuView(context: Context?, private val danmakuUrl: String, args: Map
         }
     }
 
-    /**
-     * 更新弹幕滚动速度（接收到的为已经计算好的速度）
-     * 慢、较慢、正常、较快、快
-     * （等级下标 + 1） / 3
+    /***
+     * 设置弹幕透明的
      */
-    override fun setDanmakuSpeed(speed: Float) {
+    override fun setDanmakuAlphaRatio(danmakuAlphaRatio: Int) {
         try {
-            danmakuPlayer.updatePlaySpeed(speed)
+            var alphaRatio = (danmakuAlphaRatio / 100.0f).toFloat()
+            config = config.copy(alpha = alphaRatio)
+            danmakuPlayer.updateConfig(config)
         } catch (e: Exception) {
-            Log.e(LogTagUtils.AK_DANMAKU_LOG_TAG, "setDanmakuSpeed error: $e")
+            Log.e(LogTagUtils.AK_DANMAKU_LOG_TAG, "setDanmakuAlphaRatio error: $e")
         }
     }
 
     /**
-     * 设置弹幕文字大小
+     * 设置弹幕显示区域
      */
-    override fun setDanmakuScaleTextSize(fontSize: Int) {
+    override fun setDanmakuDisplayArea(danmakuDisplayAreaIndex: Int) {
         try {
-            var fontSizeRatio = (fontSize / 100).toFloat()
+            var index: Int = danmakuDisplayAreaIndex
+            if (index >= danmakuDisplayAreaListTotal) {
+                index = danmakuDisplayAreaListTotal - 1
+            }
+            var flag: Boolean = allowOverlap
+            if (flag == null && (index == 3 || index == 4)) {
+                flag = index == 4
+            }
+            config = config.copy(
+                screenPart = danmakuDisplayAreaList[index],
+                allowOverlap = flag
+            )
+            danmakuPlayer.updateConfig(config)
+        } catch (e: Exception) {
+            Log.e(LogTagUtils.AK_DANMAKU_LOG_TAG, "setDanmakuDisplayArea error: $e")
+        }
+    }
+
+    /**
+     * 设置弹幕文字大小（百分比）
+     */
+    override fun setDanmakuScaleTextSize(danmakuFontSizeRatio: Int) {
+        try {
+            var fontSizeRatio = (danmakuFontSizeRatio / 100.0f).toFloat()
             config = config.copy(textSizeScale = fontSizeRatio)
             danmakuPlayer.updateConfig(config)
         } catch (e: Exception) {
@@ -384,10 +366,101 @@ class AKDanmakuView(context: Context?, private val danmakuUrl: String, args: Map
     }
 
     /**
-     * 设置最大显示行数
+     * 更新弹幕滚动速度
+     * 慢、较慢、正常、较快、快
+     * （等级下标 + 1） / 3
      */
-    override fun setDanmakuMaximumLines(areaIndex: Int) {
-        TODO("Not yet implemented")
+    override fun setDanmakuSpeed(danmakuSpeedIndex: Int, playSpeed: Float) {
+        try {
+            var index: Int = danmakuSpeedIndex
+            if (danmakuSpeedIndex >= danmakuSpeedListTotal) {
+                index = danmakuSpeedListTotal - 1
+            }
+            var speed: Float = danmakuSpeedList[index]
+            danmakuPlayer.updatePlaySpeed(speed * playSpeed)
+        } catch (e: Exception) {
+            Log.e(LogTagUtils.AK_DANMAKU_LOG_TAG, "setDanmakuSpeed error: $e")
+        }
     }
+
+    /**
+     * 设置过滤类型
+     */
+    private fun switchTypeFilter(show: Boolean, type: Int) {
+        (dataFilters[DanmakuFilters.FILTER_TYPE_TYPE] as? TypeFilter)?.let { filter ->
+            if (show) filter.removeFilterItem(type)
+            else filter.addFilterItem(type)
+            config.updateFilter()
+            Log.w(LogTagUtils.AK_DANMAKU_LOG_TAG, "[Controller] updateFilter visibility: ${config.visibility}")
+            danmakuPlayer.updateConfig(config)
+        }
+    }
+
+    /**
+     * 设置是否启用合并重复弹幕
+     */
+    override fun setDuplicateMergingEnabled(merge: Boolean) {
+        try {
+            switchTypeFilter(merge, DanmakuItemData.MERGED_TYPE_MERGED)
+        } catch (e: Exception) {
+            Log.e(LogTagUtils.AK_DANMAKU_LOG_TAG, "setDuplicateMergingEnabled error: $e")
+        }
+    }
+
+    /**
+     * 设置是否显示顶部弹幕
+     */
+    override fun setFixedTopDanmakuVisibility(visible: Boolean) {
+        try {
+            switchTypeFilter(visible, DanmakuItemData.DANMAKU_MODE_CENTER_TOP)
+        } catch (e: Exception) {
+            Log.e(LogTagUtils.AK_DANMAKU_LOG_TAG, "setFTDanmakuVisibility error: $e")
+        }
+    }
+    /**
+     * 设置是否显示底部弹幕
+     */
+    override fun setFixedBottomDanmakuVisibility(visible: Boolean) {
+        try {
+            switchTypeFilter(visible, DanmakuItemData.DANMAKU_MODE_CENTER_BOTTOM)
+        } catch (e: Exception) {
+            Log.e(LogTagUtils.AK_DANMAKU_LOG_TAG, "setFBDanmakuVisibility error: $e")
+        }
+    }
+
+    /**
+     * 设置是否显示左右滚动弹幕
+     */
+    override fun setRollDanmakuVisibility(visible: Boolean) {
+        try {
+            switchTypeFilter(visible, DanmakuItemData.DANMAKU_MODE_ROLLING)
+        } catch (e: Exception) {
+            Log.e(LogTagUtils.AK_DANMAKU_LOG_TAG, "setRollDanmakuVisibility error: $e")
+        }
+    }
+    /**
+     * 设置是否显示特殊弹幕
+     */
+    override fun setSpecialDanmakuVisibility(visible: Boolean) {
+        // AK没有此功能
+    }
+
+    /**
+     * 是否显示彩色弹幕
+     */
+    override fun setColorsDanmakuVisibility(visible: Boolean) {
+        try {
+            colorFilter.filterColor.clear()
+            if (!visible) {
+                colorFilter.filterColor.add(0xFFFFFF)
+            }
+            config.updateFilter()
+            danmakuPlayer.updateConfig(config)
+        } catch (e: Exception) {
+            Log.e(LogTagUtils.AK_DANMAKU_LOG_TAG, "setColorsDanmakuVisibility error: $e")
+        }
+    }
+
+
 
 }

@@ -19,16 +19,13 @@ import master.flame.danmaku.danmaku.model.android.DanmakuContext
 import master.flame.danmaku.danmaku.model.android.Danmakus
 import master.flame.danmaku.danmaku.model.android.SpannedCacheStuffer
 import master.flame.danmaku.danmaku.parser.BaseDanmakuParser
-import master.flame.danmaku.ui.widget.DanmakuView
+import master.flame.danmaku.ui.widget.DanmakuSurfaceView
 import org.apache.commons.collections4.MapUtils
 import java.io.File
 import java.io.FileInputStream
 import java.io.InputStream
 
-/**
- * 哔哩哔哩弹幕VIEW（烈焰弹幕使）
- */
-class BiliDanmakuView(
+class BiliDanmakuSurfaceView(
     context: Context?,
     private val danmakuUrl: String,
     args: Map<String, Any>
@@ -43,7 +40,7 @@ class BiliDanmakuView(
         private val danmakuDisplayAreaList: List<Float> = listOf<Float>(0.25f, 0.5f, 0.75f, 1.0f, 1.0f)
         private const val danmakuDisplayAreaListTotal: Int = 5
     }
-    private var mDanmakuView : DanmakuView
+    private var mDanmakuView : DanmakuSurfaceView
     //创建弹幕上下文
     private val mContext : DanmakuContext = DanmakuContext.create()
     // 弹幕解析器
@@ -115,7 +112,7 @@ class BiliDanmakuView(
         specialDanmakuVisibility = MapUtils.getBoolean(args, "specialDanmakuVisibility", specialDanmakuVisibility)
         colorsDanmakuVisibility = MapUtils.getBoolean(args, "colorsDanmakuVisibility", colorsDanmakuVisibility)
 
-        mDanmakuView = DanmakuView(context)
+        mDanmakuView = DanmakuSurfaceView(context)
         setSetting(context)
     }
     override fun getView(): View {
@@ -248,7 +245,7 @@ class BiliDanmakuView(
     /**
      * 创建解析器
      */
-    private fun createParser(stream : InputStream) : BaseDanmakuParser{
+    private fun createParser(stream : InputStream) : BaseDanmakuParser {
         Log.d(LogTagUtils.BILI_DANMAKU_LOG_TAG, "createParser")
         if (stream == null) {
             Log.d(LogTagUtils.BILI_DANMAKU_LOG_TAG, "stream is null")
@@ -419,8 +416,8 @@ class BiliDanmakuView(
     }
 
     /**
-    * 设置弹幕滚动速度
-    */
+     * 设置弹幕滚动速度
+     */
     override fun setDanmakuSpeed(danmakuSpeedIndex: Int, playSpeed: Float) {
         if (mDanmakuView.isPrepared) {
             try {

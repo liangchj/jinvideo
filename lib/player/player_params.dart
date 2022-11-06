@@ -59,13 +59,13 @@ class PlayerParams {
   double playSpeed = 1.0;
 
   // 弹幕设置
-  int danmakuOpacity = 100; // 不透明度
+  int danmakuAlphaRatio = PlayerConfig.danmakuAlphaRatio; // 不透明度
   // 显示区域["1/4屏", "半屏", "3/4屏", "不重叠", "无限"]，选择下标，默认半屏（下标1）
-  int danmakuDisplayArea = 1; // 显示区域
+  int danmakuDisplayAreaIndex = PlayerConfig.danmakuDisplayAreaIndex; // 显示区域
   // 区间[20, 100]， 默认20
-  int danmakuFontSize = 80;
+  int danmakuFontSizeRatio = PlayerConfig.danmakuFontSizeRatio;
   // 弹幕播放速度["极慢", "较慢", "正常", "较快", "极快"], 选择许下标， 默认正常（下标2）
-  int danmakuSpeed = 2;
+  int danmakuSpeedIndex = PlayerConfig.danmakuSpeedIndex;
 
   // 弹幕屏蔽类型
   bool duplicateMergingEnabled =

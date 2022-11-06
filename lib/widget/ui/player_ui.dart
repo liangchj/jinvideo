@@ -249,8 +249,9 @@ class _PlayerUIState extends State<PlayerUI> {
                                     id: "showDanmakuBtn",
                                     builder: (_) => IconButton(
                                         onPressed: () {
-                                          // _playerGetxController.showDanmaku(!_playerGetxController.showDanmaku.value);
-                                          // _playerGetxController.update(["showDanmakuBtn"]);
+                                          _playerParams.showDanmaku = !_playerParams.showDanmaku;
+                                          _playerGetxController.update(["showDanmakuBtn"]);
+
                                         },
                                         icon: _playerParams.showDanmaku
                                             ? const Icon(
@@ -289,7 +290,7 @@ class _PlayerUIState extends State<PlayerUI> {
                                     _playerGetxController.hideAllUI();
                                     _playerGetxController.changeShowVideoChapterListState(true);
                                   },
-                                  child: const Text("选集"),
+                                  child: const Text("选集", style: TextStyle(color: Colors.white)),
                                 ),
 
                                 // 倍数
@@ -299,7 +300,7 @@ class _PlayerUIState extends State<PlayerUI> {
                                     _playerGetxController.hideAllUI();
                                     _playerGetxController.changeShowPlaySpeedSettingState(true);
                                   },
-                                  child: const Text("倍数"),
+                                  child: const Text("倍数", style: TextStyle(color: Colors.white)),
                                 ),
 
                                 // 视频清晰度
@@ -307,7 +308,7 @@ class _PlayerUIState extends State<PlayerUI> {
                                   onPressed: () {
                                     _hideTimer?.cancel();
                                   },
-                                  child: const Text("高清"),
+                                  child: const Text("高清", style: TextStyle(color: Colors.white)),
                                 ),
                               ],
                             )
@@ -693,6 +694,7 @@ class _PlayerUIState extends State<PlayerUI> {
                                     onPressed: () {
                                       _playerParams.danmakuAdjustTime =
                                           _playerParams.danmakuAdjustTime - 0.5;
+                                      _playerGetxController.danmakuSeekTo();
                                       _playerGetxController
                                           .update(["danmakuAdjustTime"]);
                                     },
@@ -709,6 +711,7 @@ class _PlayerUIState extends State<PlayerUI> {
                                     onPressed: () {
                                       _playerParams.danmakuAdjustTime =
                                           _playerParams.danmakuAdjustTime + 0.5;
+                                      _playerGetxController.danmakuSeekTo();
                                       _playerGetxController
                                           .update(["danmakuAdjustTime"]);
                                     },
@@ -825,7 +828,7 @@ class _PlayerUIState extends State<PlayerUI> {
   /// 弹幕不透明度设置
   Widget _danmakuOpacitySetting() {
     return GetBuilder<PlayerGetxController>(
-        id: "opacitySetting",
+        id: "danmakuAlphaSetting",
         builder: (_) {
           return Row(
             children: [
@@ -859,12 +862,13 @@ class _PlayerUIState extends State<PlayerUI> {
                         overlayShape:
                             const RoundSliderOverlayShape(overlayRadius: 8)),
                     child: Slider(
-                      value: _playerParams.danmakuOpacity.toDouble(),
+                      value: _playerParams.danmakuAlphaRatio.toDouble(),
                       min: 0,
                       max: 100,
                       onChanged: (value) {
-                        _playerParams.danmakuOpacity = value.toInt();
-                        _playerGetxController.update(["opacitySetting"]);
+                        _playerParams.danmakuAlphaRatio = value.toInt();
+                        _playerGetxController.setDanmakuAlphaRatio();
+                        _playerGetxController.update(["danmakuAlphaSetting"]);
                       },
                     )),
               ),
@@ -875,7 +879,7 @@ class _PlayerUIState extends State<PlayerUI> {
                   minWidth: 16 * 2.5, // 默认显示两个字+%
                 ),
                 child: Text(
-                  "${_playerParams.danmakuOpacity}%",
+                  "${_playerParams.danmakuAlphaRatio}%",
                   style: const TextStyle(color: Colors.white),
                 ),
               ),
@@ -922,12 +926,13 @@ class _PlayerUIState extends State<PlayerUI> {
                         overlayShape:
                             const RoundSliderOverlayShape(overlayRadius: 8)),
                     child: Slider(
-                      value: _playerParams.danmakuDisplayArea.toDouble(),
+                      value: _playerParams.danmakuDisplayAreaIndex.toDouble(),
                       min: 0,
                       max: 4,
                       divisions: 4,
                       onChanged: (value) {
-                        _playerParams.danmakuDisplayArea = value.toInt();
+                        _playerParams.danmakuDisplayAreaIndex = value.toInt();
+                        _playerGetxController.setDanmakuDisplayArea();
                         _playerGetxController.update(["displayAreaSetting"]);
                       },
                     )),
@@ -939,7 +944,7 @@ class _PlayerUIState extends State<PlayerUI> {
                   minWidth: 16 * 2.5, // 默认显示两个字+%
                 ),
                 child: Text(
-                  areaList[_playerParams.danmakuDisplayArea],
+                  areaList[_playerParams.danmakuDisplayAreaIndex],
                   style: const TextStyle(color: Colors.white),
                 ),
               ),
@@ -985,11 +990,11 @@ class _PlayerUIState extends State<PlayerUI> {
                         overlayShape:
                             const RoundSliderOverlayShape(overlayRadius: 8)),
                     child: Slider(
-                      value: _playerParams.danmakuFontSize.toDouble(),
+                      value: _playerParams.danmakuFontSizeRatio.toDouble(),
                       min: 20,
                       max: 200,
                       onChanged: (value) {
-                        _playerParams.danmakuFontSize = value.toInt();
+                        _playerParams.danmakuFontSizeRatio = value.toInt();
                         _playerGetxController.update(["danmakuFontSizeSetting"]);
                         _playerGetxController.setDanmakuScaleTextSize();
                       },
@@ -1002,7 +1007,7 @@ class _PlayerUIState extends State<PlayerUI> {
                   minWidth: 16 * 2.5, // 默认显示两个字+%
                 ),
                 child: Text(
-                  "${_playerParams.danmakuFontSize}%",
+                  "${_playerParams.danmakuFontSizeRatio}%",
                   style: const TextStyle(color: Colors.white),
                 ),
               ),
@@ -1049,12 +1054,12 @@ class _PlayerUIState extends State<PlayerUI> {
                         overlayShape:
                             const RoundSliderOverlayShape(overlayRadius: 8)),
                     child: Slider(
-                      value: _playerParams.danmakuSpeed.toDouble(),
+                      value: _playerParams.danmakuSpeedIndex.toDouble(),
                       min: 0,
                       max: 4,
                       divisions: 4,
                       onChanged: (value) {
-                        _playerParams.danmakuSpeed = value.toInt();
+                        _playerParams.danmakuSpeedIndex = value.toInt();
                         _playerGetxController.update(["danmakuSpeedSetting"]);
                         _playerGetxController.setDanmakuSpeed();
                       },
@@ -1067,7 +1072,7 @@ class _PlayerUIState extends State<PlayerUI> {
                   minWidth: 16 * 2.5, // 默认显示两个字+%
                 ),
                 child: Text(
-                  speedList[_playerParams.danmakuSpeed],
+                  speedList[_playerParams.danmakuSpeedIndex],
                   style: const TextStyle(color: Colors.white),
                 ),
               ),
@@ -1139,11 +1144,10 @@ class _PlayerUIState extends State<PlayerUI> {
                         edgeInsets: EdgeInsets.only(
                             left: 5, top: 10, right: 5, bottom: 10)),
                   ),
-                  const Expanded(
+                  Expanded(
                     child: SingleChildScrollView(
                       child: BuildTextWidget(
-                        text:
-                            ",fsdfgsadgfsgabcsarvyawsetryateratrtaytsytr6356wvc36c",
+                        text: _playerParams.danmakuUrl ?? "",
                       ),
                     ),
                   )

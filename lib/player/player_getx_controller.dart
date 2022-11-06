@@ -62,7 +62,12 @@ class PlayerGetxController extends GetxController {
   /// 播放器初始化
   void initPlayer(IPlayerMethod method) {
     playerMethod = method;
-    playerMethod.onInitPlayer().then((value) {});
+    playerMethod.onInitPlayer().then((value) {
+      if (playerParams.autoPlay) {
+        _createDanmakuWidget();
+        play();
+      }
+    });
   }
 
   /// 销毁播放器
@@ -281,7 +286,17 @@ class PlayerGetxController extends GetxController {
               viewType: "JIN_DANMAKU_NATIVE_VIEW",
               creationParams: {
                 'danmakuUrl': "/storage/emulated/0/Android/data/com.xyoye.dandanplay/files/danmu/18778692/test_danmaku_data.json",
-                "danmakuType": "AK"
+                "danmakuType": "AK",
+                "isStart": playerParams.autoPlay || playerParams.isPlaying,
+                "danmakuFontSizeRatio": playerParams.danmakuFontSizeRatio,
+                "danmakuSpeedIndex": playerParams.danmakuSpeedIndex,
+                // "danmakuOpacity": playerParams.danmakuOpacity,
+                "fixedTopDanmakuVisibility": playerParams.fixedTopDanmakuVisibility,
+                "fixedBottomDanmakuVisibility": playerParams.fixedBottomDanmakuVisibility,
+                "rollDanmakuVisibility": playerParams.rollDanmakuVisibility,
+                "specialDanmakuVisibility": playerParams.specialDanmakuVisibility,
+                "duplicateMergingEnabled": playerParams.duplicateMergingEnabled,
+                "colorsDanmakuVisibility": playerParams.colorsDanmakuVisibility
               },
               creationParamsCodec: StandardMessageCodec(),
               hitTestBehavior: PlatformViewHitTestBehavior.transparent,
@@ -293,13 +308,16 @@ class PlayerGetxController extends GetxController {
                 "danmakuType": "BILI",
                 "isShowFPS": false,
                 "isShowCache": false,
-                "isStart": playerParams.isPlaying,
+                "isStart": playerParams.autoPlay || playerParams.isPlaying,
+                "danmakuFontSizeRatio": playerParams.danmakuFontSizeRatio,
+                "danmakuSpeedIndex": playerParams.danmakuSpeedIndex,
+                // "danmakuOpacity": playerParams.danmakuOpacity,
                 "fixedTopDanmakuVisibility": playerParams.fixedTopDanmakuVisibility,
                 "fixedBottomDanmakuVisibility": playerParams.fixedBottomDanmakuVisibility,
                 "rollDanmakuVisibility": playerParams.rollDanmakuVisibility,
                 "specialDanmakuVisibility": playerParams.specialDanmakuVisibility,
                 "duplicateMergingEnabled": playerParams.duplicateMergingEnabled,
-                "colorsDanmakuVisibility": playerParams.colorsDanmakuVisibility,
+                "colorsDanmakuVisibility": false,
               },
               creationParamsCodec: const StandardMessageCodec(),
               hitTestBehavior: PlatformViewHitTestBehavior.transparent,
@@ -333,7 +351,7 @@ class PlayerGetxController extends GetxController {
       // update(["showDanmaku"]);
     }
     if (playerParams.danmakuUI != null && playerParams.danmakuUICreateSuccess) {
-      playerParams.platform.invokeMethod('showDanmaKu').then((value) {
+      playerParams.platform.invokeMethod('setDanmaKuVisibility', {"visible": true}).then((value) {
         if (playerParams.isPlaying) {
           startDanmaku(playerParams.positionDuration);
         }
@@ -353,16 +371,24 @@ class PlayerGetxController extends GetxController {
   /// 隐藏弹幕
   Future<void> hideDanmaKu() async {
     if (playerParams.danmakuUI != null && playerParams.danmakuUICreateSuccess) {
-      return await playerParams.platform.invokeMethod('hideDanmaKu');
+      return await playerParams.platform.invokeMethod('setDanmaKuVisibility', {"visible": false});
+    }
+  }
+
+  Future<void> setDanmaKuVisibility() async {
+    if (playerParams.showDanmaku) {
+      return await showDanmaKu();
+    } else {
+      return await hideDanmaKu();
     }
   }
 
   /// 弹幕跳转
   Future<void> danmakuSeekTo({Duration? duration}) async {
-    var to = (duration ?? playerParams.positionDuration).inMilliseconds.toString();
+    var to = ((duration ?? playerParams.positionDuration).inMilliseconds + playerParams.danmakuAdjustTime * 1000).toString();
     if (playerParams.danmakuUI != null && playerParams.danmakuUICreateSuccess) {
-      var result = await playerParams.platform.invokeMethod(
-          'danmaKuSeekTo', {'time': to});
+      // var result = await playerParams.platform.invokeMethod('danmaKuSeekTo', {'time': to});
+      var result = await playerParams.platform.invokeMethod('startDanmaku', {'time': to});
       print("跳转弹幕状态：$result");
       if (result && !playerParams.isPlaying) {
         // 因弹幕引擎在跳转时重新绘制出现，因此跳转后延迟300毫秒在停止
@@ -371,21 +397,37 @@ class PlayerGetxController extends GetxController {
     }
   }
 
-  /// 设置弹幕滚动速度
-  Future<void> setDanmakuSpeed() async {
-    double speedRatio = playerParams.playSpeed * PlayerConfig.danmakuSpeedList[playerParams.danmakuSpeed];
-    print("计算后的弹幕速度系数: $speedRatio");
+  /// 设置弹幕透明的（百分比）
+  Future<void> setDanmakuAlphaRatio() async {
     if (playerParams.danmakuUI != null && playerParams.danmakuUICreateSuccess) {
-      return await playerParams.platform.invokeMethod('setScrollSpeedFactor', {'speedRatio': speedRatio});
+      return await playerParams.platform.invokeMethod('setDanmakuAlphaRatio', {'danmakuAlphaRatio': playerParams.danmakuAlphaRatio});
+    }
+  }
+  /// 设置显示区域（区域下标）
+  Future<void> setDanmakuDisplayArea() async {
+    if (playerParams.danmakuUI != null && playerParams.danmakuUICreateSuccess) {
+      return await playerParams.platform.invokeMethod('setDanmakuDisplayArea', {'danmakuDisplayAreaIndex': playerParams.danmakuDisplayAreaIndex});
     }
   }
 
   /// 设置弹幕字体大小
   Future<void> setDanmakuScaleTextSize() async {
+    print("设置弹幕字体大小:${playerParams.danmakuFontSizeRatio}");
     if (playerParams.danmakuUI != null && playerParams.danmakuUICreateSuccess) {
-      return await playerParams.platform.invokeMethod('setDanmakuScaleTextSize', {'danmakuFontSize': playerParams.danmakuFontSize});
+      print("设置弹幕字体大小:${playerParams.danmakuFontSizeRatio}");
+      return await playerParams.platform.invokeMethod('setDanmakuScaleTextSize', {'danmakuFontSizeRatio': playerParams.danmakuFontSizeRatio});
     }
   }
+
+  /// 设置弹幕滚动速度
+  Future<void> setDanmakuSpeed() async {
+    if (playerParams.danmakuUI != null && playerParams.danmakuUICreateSuccess) {
+      return await playerParams.platform.invokeMethod('setDanmakuSpeed',
+          {'danmakuSpeedIndex': playerParams.danmakuSpeedIndex, "playSpeed": playerParams.playSpeed}
+      );
+    }
+  }
+
 
   /// 设置是否启用合并重复弹幕
   Future<void> setDuplicateMergingEnabled() async {
